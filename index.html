@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>XENON | Habit Engine v4.8</title>
+    <title>XENON | Habit Engine v4.9</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Syncopate:wght@700&family=Outfit:wght@300;600;800&display=swap" rel="stylesheet">
@@ -21,7 +21,6 @@
         .neon-text { color: #00f2ff; text-shadow: 0 0 10px #00f2ff; }
         .progress-fill { height: 100%; background: linear-gradient(90deg, #00f2ff, #bc13fe); transition: 1s cubic-bezier(0.19, 1, 0.22, 1); box-shadow: 0 0 15px #00f2ff; }
         
-        /* Calendar Grid */
         .day-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; margin-top: 12px; }
         .day-btn { aspect-ratio: 1; border-radius: 8px; border: 1px solid rgba(255,255,255,0.1); font-size: 10px; display: flex; align-items: center; justify-content: center; transition: 0.2s; background: rgba(255,255,255,0.02); }
         .day-done { background: #00f2ff !important; color: #000 !important; font-weight: 800; border: none !important; box-shadow: 0 0 10px #00f2ff; }
@@ -32,16 +31,20 @@
         .screen { position: fixed; inset: 0; z-index: 1000; background: #000; display: flex; flex-direction: column; justify-content: center; padding: 25px; transition: 0.8s ease; }
         #main-app { display: none; padding-top: 90px; min-height: 100vh; background: #000; padding-bottom: 50px; }
         
-        /* Auth Inputs */
         .auth-input { width: 100%; background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); padding: 16px; border-radius: 12px; margin-bottom: 15px; font-size: 14px; color: #fff; transition: 0.3s; }
         .auth-input:focus { border-color: #00f2ff; background: rgba(0,242,255,0.02); }
         
-        /* Eye Toggle Styling */
-        .eye-btn { position: absolute; right: 15px; top: 18px; color: rgba(0, 242, 255, 0.5); transition: 0.3s; }
-        .eye-btn:active { transform: scale(0.8); }
-
+        .eye-btn { position: absolute; right: 15px; top: 18px; color: rgba(0, 242, 255, 0.5); }
+        
         #menu-box { display: none; position: fixed; top: 75px; right: 20px; width: 220px; z-index: 2000; }
         .menu-item { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 11px; font-weight: bold; letter-spacing: 1px; text-transform: uppercase; }
+
+        /* Guide Modal Fix: Added Solid Background and High Z-Index */
+        #guide-modal { 
+            position: fixed; inset: 0; background: #050505; z-index: 9999; 
+            display: none; flex-direction: column; justify-content: center; padding: 35px;
+            overflow-y: auto;
+        }
         
         ::-webkit-scrollbar { width: 0px; }
     </style>
@@ -52,15 +55,11 @@
     <div id="auth-screen" class="screen">
         <div class="text-center mb-10">
             <h1 class="font-tech text-4xl neon-text italic tracking-tighter">XENON</h1>
-            <p class="text-[9px] tracking-[0.6em] opacity-30 mt-2 uppercase font-bold">Secure Habit Engine</p>
+            <p class="text-[9px] tracking-[0.6em] opacity-30 mt-2 uppercase font-bold text-white">Core Habit Engine</p>
         </div>
         <div class="glass p-8 border-[#00f2ff11]">
             <h2 id="auth-title" class="text-center text-xs font-bold mb-8 tracking-[0.3em] text-gray-400 uppercase">Sign In</h2>
-            
-            <!-- Email -->
             <input type="email" id="email" placeholder="GMAIL ADDRESS" class="auth-input">
-            
-            <!-- Password Container -->
             <div class="relative w-full">
                 <input type="password" id="pass" placeholder="PASSWORD" class="auth-input pr-12">
                 <button type="button" onclick="tracker.togglePassword()" class="eye-btn">
@@ -70,11 +69,9 @@
                     </svg>
                 </button>
             </div>
-
             <button id="auth-btn" onclick="tracker.handleAuth()" class="w-full py-4 bg-white text-black font-black rounded-xl text-sm mb-6 active:scale-95 transition uppercase mt-4">Initialize</button>
-            
             <p class="text-center text-[10px] opacity-50">
-                <span id="auth-toggle-text">First time here?</span> 
+                <span id="auth-toggle-text">New to the system?</span> 
                 <button onclick="tracker.toggleAuthMode()" class="text-[#00f2ff] font-bold underline ml-1" id="auth-toggle-btn">Create Account</button>
             </p>
         </div>
@@ -88,18 +85,18 @@
         </header>
 
         <div id="menu-box" class="glass border-white/10 shadow-2xl overflow-hidden">
-            <div class="menu-item opacity-40">System v4.8 (Stable)</div>
+            <div class="menu-item opacity-40">System v4.9 (Stable)</div>
             <div class="menu-item" onclick="tracker.showGuide()">User Guide</div>
             <a href="https://instagram.com/teamxenon09" target="_blank" class="menu-item block text-cyan-400 italic">Author: @teamxenon09</a>
             <div class="menu-item text-red-500" onclick="tracker.logout()">Logout Session</div>
         </div>
 
         <div class="px-6">
-            <!-- Stats -->
             <div class="glass p-6 mb-8 border-[#00f2ff11]">
                 <div class="flex justify-between items-end mb-4">
                     <select id="month-select" onchange="tracker.fetchData()" class="bg-transparent font-bold text-[#00f2ff] text-2xl outline-none border-none p-0 uppercase tracking-tighter">
-                        <option value="0">January</option><option value="1">February</option><option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
+                        <option value="0">January</option><option value="1">February</option>
+                        <option value="2">March</option><option value="3">April</option><option value="4">May</option><option value="5">June</option><option value="6">July</option><option value="7">August</option><option value="8">September</option><option value="9">October</option><option value="10">November</option><option value="11">December</option>
                     </select>
                     <span id="score-text" class="font-tech text-xl text-[#00f2ff]">0%</span>
                 </div>
@@ -108,7 +105,6 @@
                 </div>
             </div>
 
-            <!-- Input -->
             <div class="flex gap-2 mb-10">
                 <input type="text" id="habit-name" placeholder="ADD NEW PROTOCOL..." class="flex-grow glass border-none px-6 py-4 text-sm font-bold tracking-tight uppercase bg-white/5">
                 <button onclick="tracker.addHabit()" class="bg-[#00f2ff] text-black w-14 rounded-2xl font-black text-2xl shadow-lg">+</button>
@@ -116,7 +112,6 @@
 
             <div id="habit-list" class="space-y-6 mb-16"></div>
 
-            <!-- Rankings -->
             <div class="glass p-6 mb-16 border-purple-500/10">
                 <h3 class="text-[9px] font-tech text-purple-400 mb-6 tracking-[0.4em] uppercase italic text-center">Global Efficiency Ranking</h3>
                 <div id="leaderboard" class="space-y-4"></div>
@@ -125,19 +120,21 @@
         
         <footer class="py-12 text-center opacity-30 border-t border-white/5">
             <p class="text-[10px] font-bold tracking-[0.5em] mb-2 uppercase">Made by @teamxenon09</p>
+            <div class="text-[8px] italic">XENON CORE • PERSISTENT BACKUP ACTIVE</div>
         </footer>
     </div>
 
-    <!-- GUIDE -->
-    <div id="guide-modal" class="fixed inset-0 bg-black/98 z-[3000] hidden p-10 flex flex-col justify-center">
+    <!-- GUIDE MODAL (Corrected Opaque Background) -->
+    <div id="guide-modal">
         <h2 class="font-tech text-cyan-400 mb-8 text-2xl uppercase italic">Protocol Guide</h2>
         <ul class="space-y-6 text-sm text-gray-400 font-medium">
-            <li><b class="text-white">ADD:</b> Create a habit and hit '+'.</li>
-            <li><b class="text-white">TRACK:</b> Tap any date to mark it done.</li>
-            <li><b class="text-white">TODAY:</b> Pulsing box is the current date.</li>
-            <li><b class="text-white">BACKUP:</b> Everything is saved to Gmail.</li>
+            <li><b class="text-white">1. LOGGING:</b> Your data is securely backed up to your Gmail account automatically.</li>
+            <li><b class="text-white">2. TRACKING:</b> Simply tap a date box to mark your daily habit as COMPLETED.</li>
+            <li><b class="text-white">3. TODAY:</b> The pulsing neon box represents the CURRENT DATE.</li>
+            <li><b class="text-white">4. RANKING:</b> Maintain high efficiency to climb the Global Leaderboard.</li>
+            <li><b class="text-white">5. SYNC:</b> Always log in with the same email to restore your data.</li>
         </ul>
-        <button onclick="tracker.closeGuide()" class="mt-12 py-4 bg-white text-black font-black rounded-xl text-xs uppercase">Got it</button>
+        <button onclick="tracker.closeGuide()" class="mt-12 py-4 bg-white text-black font-black rounded-xl text-xs uppercase tracking-widest active:scale-95 transition">Back to Dashboard</button>
     </div>
 
     <script>
@@ -176,27 +173,22 @@
                 });
             },
 
-            // --- Password Show/Hide Toggle ---
             togglePassword() {
                 const passInput = document.getElementById('pass');
                 const eyeIcon = document.getElementById('eye-icon');
                 if (passInput.type === 'password') {
                     passInput.type = 'text';
-                    // Change to Eye Off Icon
                     eyeIcon.innerHTML = '<line x1="1" y1="1" x2="23" y2="23"></line><path d="M9 9a3 3 0 1 1 6 6"></path><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"></path>';
-                    eyeIcon.style.color = "#00f2ff";
                 } else {
                     passInput.type = 'password';
-                    // Change to Eye Open Icon
                     eyeIcon.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle>';
-                    eyeIcon.style.color = "rgba(0, 242, 255, 0.5)";
                 }
             },
 
             toggleAuthMode() {
                 this.isSignUp = !this.isSignUp;
-                document.getElementById('auth-title').innerText = this.isSignUp ? "Create Account" : "Sign In";
-                document.getElementById('auth-btn').innerText = this.isSignUp ? "Register" : "Initialize";
+                document.getElementById('auth-title').innerText = this.isSignUp ? "CREATE NEW ACCOUNT" : "SIGN IN TO ACCESS";
+                document.getElementById('auth-btn').innerText = this.isSignUp ? "START CORE SESSION" : "INITIALIZE CORE";
                 document.getElementById('auth-toggle-btn').innerText = this.isSignUp ? "Sign In" : "Create Account";
             },
 
@@ -204,9 +196,6 @@
                 const email = document.getElementById('email').value.trim();
                 const pass = document.getElementById('pass').value.trim();
                 if(!email || !pass) return alert("System requires full credentials!");
-                if(window.location.protocol.startsWith('content') || window.location.protocol.startsWith('file')) {
-                    alert("⚠️ Open from GitHub link only!"); return;
-                }
                 if(this.isSignUp) {
                     auth.createUserWithEmailAndPassword(email, pass).catch(e => alert(e.message));
                 } else {
@@ -236,12 +225,12 @@
 
             toggleDay(id, day) {
                 const month = document.getElementById('month-select').value;
-                const currentStatus = (this.habits[id].days && this.habits[id].days[day]) || false;
-                db.ref(`v4/users/${this.userId}/${month}/${id}/days/${day}`).set(!currentStatus);
+                const status = (this.habits[id].days && this.habits[id].days[day]) || false;
+                db.ref(`v4/users/${this.userId}/${month}/${id}/days/${day}`).set(!status);
             },
 
             removeHabit(id) {
-                if(confirm("Remove this habit?")) {
+                if(confirm("Terminate this habit protocol?")) {
                     const month = document.getElementById('month-select').value;
                     db.ref(`v4/users/${this.userId}/${month}/${id}`).remove();
                 }
@@ -254,7 +243,7 @@
                 const today = new Date().getDate();
                 const isCurrentMonth = new Date().getMonth() === mIdx;
 
-                list.innerHTML = Object.keys(this.habits).length === 0 ? `<p class="text-center opacity-20 py-10">No habits added.</p>` : "";
+                list.innerHTML = Object.keys(this.habits).length === 0 ? `<p class="text-center opacity-20 italic py-10">No protocols set.</p>` : "";
 
                 Object.keys(this.habits).forEach(id => {
                     const h = this.habits[id];
@@ -264,17 +253,17 @@
                         grid += `<div onclick="tracker.toggleDay('${id}', ${i})" class="day-btn ${done ? 'day-done' : ''} ${isCurrentMonth && i === today ? 'today-glow' : ''}">${i}</div>`;
                     }
                     grid += `</div>`;
-                    list.innerHTML += `<div class="glass p-5"><div class="flex justify-between items-center mb-2"><h4 class="font-bold text-[11px] uppercase neon-text tracking-widest">${h.name}</h4><button onclick="tracker.removeHabit('${id}')" class="text-[8px] text-red-500 font-bold opacity-30">DELETE</button></div>${grid}</div>`;
+                    list.innerHTML += `<div class="glass p-5 border-[#00f2ff11]"><div class="flex justify-between items-center mb-2"><h4 class="font-bold text-[11px] uppercase neon-text tracking-widest">${h.name}</h4><button onclick="tracker.removeHabit('${id}')" class="text-[8px] text-red-500 font-bold opacity-30">DELETE</button></div>${grid}</div>`;
                 });
-                this.updateScore(daysInMonth);
+                this.updateGlobalScore(daysInMonth);
             },
 
-            updateScore(daysInMonth) {
+            updateGlobalScore(daysInMonth) {
                 const totalH = Object.keys(this.habits).length;
                 if(totalH === 0) { document.getElementById('score-bar').style.width = "0%"; document.getElementById('score-text').innerText = "0%"; return; }
-                let doneCount = 0;
-                Object.values(this.habits).forEach(h => { if(h.days) doneCount += Object.values(h.days).filter(d => d === true).length; });
-                const score = Math.round((doneCount / (totalH * daysInMonth)) * 100);
+                let done = 0;
+                Object.values(this.habits).forEach(h => { if(h.days) done += Object.values(h.days).filter(d => d === true).length; });
+                const score = Math.round((done / (totalH * daysInMonth)) * 100);
                 document.getElementById('score-bar').style.width = score + "%";
                 document.getElementById('score-text').innerText = score + "%";
                 db.ref(`leaderboard/${this.userId}`).set({ name: auth.currentUser.email.split('@')[0], score });
@@ -284,10 +273,11 @@
                 db.ref('leaderboard').orderByChild('score').limitToLast(5).on('value', snap => {
                     const board = document.getElementById('leaderboard');
                     board.innerHTML = "";
-                    const users = Object.values(snap.val() || {}).sort((a,b) => b.score - a.score);
+                    const rawData = snap.val() || {};
+                    const users = Object.values(rawData).filter(u => u.name).sort((a,b) => b.score - a.score);
                     users.forEach((u, i) => {
                         const isMe = u.name === auth.currentUser.email.split('@')[0];
-                        board.innerHTML += `<div class="flex justify-between items-center p-3 rounded-xl ${isMe ? 'bg-[#00f2ff11] border border-[#00f2ff33]' : 'bg-white/5'}"><span class="text-xs font-bold uppercase">${i+1}. ${u.name}</span><span class="text-[10px] font-tech text-[#00f2ff]">${u.score}%</span></div>`;
+                        board.innerHTML += `<div class="flex justify-between items-center p-4 rounded-xl ${isMe ? 'bg-[#00f2ff11] border border-[#00f2ff33]' : 'bg-white/5'}"><span class="text-xs font-bold uppercase">${i+1}. ${u.name}</span><span class="text-[10px] font-tech text-[#00f2ff]">${u.score}%</span></div>`;
                     });
                 });
             },
